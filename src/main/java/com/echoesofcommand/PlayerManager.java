@@ -1,8 +1,6 @@
 package com.echoesofcommand;
-
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -32,7 +30,7 @@ public class PlayerManager {
     public PlayerRecord registerUser(String username) {
         if (records.containsKey(username)) {
             throw new IllegalArgumentException(
-                    "Username '" + username + "' already exists. Please choose another."
+                    "Username '" + username + "' already exists. Please choose another one."
             );
         }
         PlayerRecord rec = new PlayerRecord(username);
@@ -50,10 +48,7 @@ public class PlayerManager {
 
     public List<PlayerRecord> leaderboard() {
         List<PlayerRecord> list = new ArrayList<>(records.values());
-        list.sort(Comparator
-                .comparingInt(PlayerRecord::getBestScore).reversed()
-                .thenComparingLong(PlayerRecord::getBestTimeMillis)
-        );
+        list.sort(Comparator.comparingInt(PlayerRecord::getBestScore).reversed().thenComparingLong(PlayerRecord::getBestTimeMillis));
         return list;
     }
 }

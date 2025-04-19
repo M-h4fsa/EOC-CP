@@ -1,5 +1,4 @@
 package com.echoesofcommand;
-
 import java.util.List;
 
 public interface GameUI {
