@@ -96,7 +96,7 @@ public class ConsoleUI implements GameUI {
 
     @Override
     public void displayResult(boolean correct, String summary) {
-        System.out.println(correct ? "✔️  Correct!" : "❌  Incorrect");
+        System.out.println(correct ? "✔️ Correct!" : "❌ Incorrect");
         System.out.println(summary);
     }
 
