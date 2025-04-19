@@ -13,7 +13,7 @@ public class Main {
         while (running) {
             ui.displayWelcomeMessage();
 
-            // Unique‐username registration
+            // Unique username registration
             PlayerRecord player;
             while (true) {
                 String username = ui.promptUsername();
@@ -26,7 +26,6 @@ public class Main {
             }
 
             boolean userActive = true;
-            boolean firstGame = true;
             while (userActive) {
                 ui.searchDisabledNotice();
                 int mode = ui.promptPlayMode();
@@ -36,29 +35,24 @@ public class Main {
                                 ? List.of(ui.selectLeader(allLeaders))
                                 : allLeaders;
 
-                // Play one or all leaders
                 Game game = new Game(toPlay, ui, player, am);
                 game.start();
 
                 pm.save();
 
-                // Archive prompt only once
-                if (firstGame && ui.promptArchiveSearch()) {
+                if (ui.promptArchiveSearch()) {
                     am.promptSearch();
                 }
-                firstGame = false;
 
                 int next = ui.promptPostRoundOption();
                 switch (next) {
-                    case 1 -> { /* replay same user */ }
-                    case 2 -> userActive = false;            // switch user
-                    case 3 -> { userActive = false; running = false; } // quit all
+                    case 1 -> {/*replay with same username*/}
+                    case 2 -> userActive = false;
+                    case 3 -> { userActive = false; running = false; }
                 }
             }
-
             ui.displayLeaderboard(pm.leaderboard());
         }
-
         ui.displayGoodbyeMessage();
     }
 }
