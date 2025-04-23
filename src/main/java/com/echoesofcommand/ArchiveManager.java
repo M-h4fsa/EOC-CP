@@ -21,13 +21,7 @@ public class ArchiveManager {
                 .findFirst()
                 .map(Choice::getText)
                 .orElse("");
-        archive.add(new ArchiveEntry(
-                leader,
-                level.getNumber(),
-                level.getDescription(),
-                histChoice,
-                level.getSummary()
-        ));
+        archive.add(new ArchiveEntry(leader, level.getNumber(), level.getDescription(), histChoice, level.getSummary()));
     }
 
     public void saveToJson() {
