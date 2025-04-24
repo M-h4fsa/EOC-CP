@@ -6,87 +6,126 @@ import com.google.gson.reflect.TypeToken;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Manages player records, including registration, login, and leaderboard functionality.
+ * Manages player records, including login and leaderboard functionality.
  */
 public class PlayerManager {
-    private static final String PLAYERS_FILE = "players.json";
-    private Map<String, PlayerRecord> records;
+    private final Map<String, PlayerRecord> records;
+    private static final String PLAYER_FILE = "players.json";
 
     /**
-     * Initializes the PlayerManager by loading existing player records from file.
+     * Creates a new PlayerManager, loading existing player records from file.
      */
     public PlayerManager() {
-        this.records = loadRecords();
+        records = load();
     }
 
     /**
-     * Loads player records from the players.json file.
-     * @return A map of usernames to PlayerRecord objects, or an empty map if loading fails.
-     */
-    private Map<String, PlayerRecord> loadRecords() {
-        try (Reader reader = new FileReader(PLAYERS_FILE)) {
-            Type type = new TypeToken<Map<String, PlayerRecord>>(){}.getType();
-            Map<String, PlayerRecord> loaded = new Gson().fromJson(reader, type);
-            return loaded != null ? loaded : new HashMap<>();
-        } catch (IOException e) {
-            System.err.println("Warning: Could not load player records: " + e.getMessage() + ". Using empty records.");
-            return new HashMap<>();
-        }
-    }
-
-    /**
-     * Logs in a player, creating a new record if the username doesn't exist, and records the login time.
-     * @param username The player's username.
-     * @return The PlayerRecord for the user.
+     * Logs in a player, creating a new record if the username doesn't exist.
+     * @param username The username to log in.
+     * @return The player's record.
      */
     public PlayerRecord login(String username) {
-        PlayerRecord record = records.computeIfAbsent(username, k -> new PlayerRecord(username));
-        record.recordLogin(System.currentTimeMillis());
-        save();
-        return record;
-    }
-
-    /**
-     * Registers a new user, throwing an exception if the username is taken.
-     * @param username The desired username.
-     * @return The new PlayerRecord.
-     * @throws IllegalArgumentException If the username already exists.
-     */
-    public PlayerRecord registerUser(String username) {
-        if (records.containsKey(username)) {
-            throw new IllegalArgumentException(
-                    "Username '" + username + "' already exists. Please choose another one."
-            );
+        PlayerRecord player = records.get(username);
+        if (player == null) {
+            player = new PlayerRecord(username, "");
+            records.put(username, player);
         }
-        PlayerRecord record = new PlayerRecord(username);
-        record.recordLogin(System.currentTimeMillis());
-        records.put(username, record);
-        save();
-        return record;
+        return player;
     }
 
     /**
-     * Saves player records to the players.json file.
+     * Records a login timestamp for a player.
+     * @param player The player to record the login for.
+     */
+    public void recordLogin(PlayerRecord player) {
+        player.addLogin(System.currentTimeMillis());
+    }
+
+    /**
+     * Saves player records to a JSON file.
      */
     public void save() {
-        try (Writer writer = new FileWriter(PLAYERS_FILE)) {
-            new Gson().toJson(records, writer);
+        try (Writer writer = new FileWriter(PLAYER_FILE)) {
+            new Gson().toJson(records.values(), writer);
         } catch (IOException e) {
-            System.err.println("Error: Failed to save player records: " + e.getMessage());
+            System.err.println("Warning: Failed to save players: " + e.getMessage());
         }
     }
 
     /**
-     * Generates a sorted leaderboard based on best scores and times.
-     * @return A sorted list of PlayerRecord objects.
+     * Generates the leaderboard, sorted by scores and times.
+     * @return The list of player records, sorted.
      */
     public List<PlayerRecord> leaderboard() {
         List<PlayerRecord> list = new ArrayList<>(records.values());
-        list.sort(Comparator.comparingInt(PlayerRecord::getBestScore)
-                .reversed()
-                .thenComparingLong(PlayerRecord::getBestTimeMillis));
+
+        // Sort by single-leader score, then time
+        list.sort((a, b) -> {
+            int scoreCompare = Integer.compare(b.getBestSingleScore(), a.getBestSingleScore());
+            if (scoreCompare != 0) {
+                return scoreCompare;
+            }
+            return Long.compare(a.getBestSingleTimeMillis(), b.getBestSingleTimeMillis());
+        });
+
+        // Sort by sequential score, then time (in-place, after single-leader sort)
+        list.sort((a, b) -> {
+            int scoreCompare = Integer.compare(b.getBestSequentialScore(), a.getBestSequentialScore());
+            if (scoreCompare != 0) {
+                return scoreCompare;
+            }
+            return Long.compare(a.getBestSequentialTimeMillis(), b.getBestSequentialTimeMillis());
+        });
+
+        // Sort by randomized score, then time (in-place, after sequential sort)
+        list.sort((a, b) -> {
+            int scoreCompare = Integer.compare(b.getBestRandomizedScore(), a.getBestRandomizedScore());
+            if (scoreCompare != 0) {
+                return scoreCompare;
+            }
+            return Long.compare(a.getBestRandomizedTimeMillis(), b.getBestRandomizedTimeMillis());
+        });
+
         return list;
+    }
+
+    /**
+     * Loads player records from a JSON file.
+     * @return The map of usernames to player records.
+     */
+    private Map<String, PlayerRecord> load() {
+        File file = new File(PLAYER_FILE);
+        if (!file.exists()) {
+            return new HashMap<>();
+        }
+        try (Reader reader = new FileReader(file)) {
+            Gson gson = new Gson();
+            // First, try to load as a List<PlayerRecord> (new format)
+            try {
+                Type listType = new TypeToken<List<PlayerRecord>>() {}.getType();
+                List<PlayerRecord> list = gson.fromJson(reader, listType);
+                if (list != null) {
+                    return list.stream()
+                            .collect(Collectors.toMap(PlayerRecord::getUsername, p -> p));
+                }
+            } catch (com.google.gson.JsonSyntaxException e) {
+                // If that fails, try to load as a Map<String, PlayerRecord> (old format)
+                reader.close();
+                try (Reader reader2 = new FileReader(file)) {
+                    Type mapType = new TypeToken<Map<String, PlayerRecord>>() {}.getType();
+                    Map<String, PlayerRecord> map = gson.fromJson(reader2, mapType);
+                    if (map != null) {
+                        return map;
+                    }
+                }
+            }
+            return new HashMap<>();
+        } catch (IOException e) {
+            System.err.println("Warning: Failed to load players: " + e.getMessage());
+            return new HashMap<>();
+        }
     }
 }

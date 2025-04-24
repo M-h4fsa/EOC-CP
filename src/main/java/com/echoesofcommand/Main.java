@@ -27,6 +27,7 @@ public class Main {
             String username = ui.promptUsername();
             player = pm.login(username);
             ui.displayWelcomeForPlayer(player);
+            pm.recordLogin(player); // Record login after displaying welcome message
 
             boolean userActive = true;
             while (userActive) {

@@ -262,6 +262,19 @@ public class ConsoleUI implements GameUI {
                 );
             }
         }
+
+        System.out.println("\n=== Randomized (All Leaders) Best Scores ===");
+        System.out.printf("%-15s  %-5s  %-6s%n", "Player", "Score", "Time(s)");
+        for (PlayerRecord record : list) {
+            if (record.getBestRandomizedScore() > 0) {
+                System.out.printf(
+                        "%-15s  %-5d  %-6.2f%n",
+                        record.getUsername(),
+                        record.getBestRandomizedScore(),
+                        record.getBestRandomizedTimeMillis() / 1000.0
+                );
+            }
+        }
     }
 
     /**
