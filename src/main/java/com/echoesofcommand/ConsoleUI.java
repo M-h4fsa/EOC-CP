@@ -19,7 +19,7 @@ public class ConsoleUI implements GameUI {
 
     @Override
     public void searchDisabledNotice() {
-        System.out.println("[Note] Level-search disabled until after play.]");
+        System.out.println("[Note] Archive-search disabled until after play.");
     }
 
     @Override
@@ -96,7 +96,7 @@ public class ConsoleUI implements GameUI {
 
     @Override
     public void displayResult(boolean correct, String summary) {
-        System.out.println(correct ? "✔️  Correct!" : "❌  Incorrect");
+        System.out.println(correct ? "✔️ Correct!" : "❌ Incorrect");
         System.out.println(summary);
     }
 

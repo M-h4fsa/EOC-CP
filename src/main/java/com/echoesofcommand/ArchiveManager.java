@@ -21,13 +21,7 @@ public class ArchiveManager {
                 .findFirst()
                 .map(Choice::getText)
                 .orElse("");
-        archive.add(new ArchiveEntry(
-                leader,
-                level.getNumber(),
-                level.getDescription(),
-                histChoice,
-                level.getSummary()
-        ));
+        archive.add(new ArchiveEntry(leader, level.getNumber(), level.getDescription(), histChoice, level.getSummary()));
     }
 
     public void saveToJson() {
@@ -48,10 +42,7 @@ public class ArchiveManager {
         if (!sc.nextLine().trim().equalsIgnoreCase("yes")) return;
         System.out.print("Enter keyword to search: ");
         String keyword = sc.nextLine().toLowerCase();
-        List<ArchiveEntry> results = archive.stream()
-                .filter(e -> e.description.toLowerCase().contains(keyword)
-                          || e.leader.toLowerCase().contains(keyword))
-                .collect(Collectors.toList());
+        List<ArchiveEntry> results = archive.stream().filter(e -> e.description.toLowerCase().contains(keyword) || e.leader.toLowerCase().contains(keyword)).collect(Collectors.toList());
         if (results.isEmpty()) {
             System.out.println("[No results found. Try a different keyword or play more levels.]");
             return;
