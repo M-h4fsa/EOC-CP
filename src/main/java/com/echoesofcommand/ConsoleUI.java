@@ -1,8 +1,11 @@
 package com.echoesofcommand;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * Implements the game UI using the console.
@@ -11,18 +14,11 @@ public class ConsoleUI implements GameUI {
     private final Scanner sc = new Scanner(System.in);
     private static final String VALID_USERNAME_REGEX = "[a-zA-Z0-9_]+";
 
-    /**
-     * Displays the game welcome message.
-     */
     @Override
     public void displayWelcomeMessage() {
         System.out.println("=== Echoes of Command ===");
     }
 
-    /**
-     * Prompts for and validates a username.
-     * @return A valid username.
-     */
     @Override
     public String promptUsername() {
         while (true) {
@@ -38,18 +34,11 @@ public class ConsoleUI implements GameUI {
         }
     }
 
-    /**
-     * Displays a notice that archive search is disabled.
-     */
     @Override
     public void searchDisabledNotice() {
         System.out.println("[Note] Archive-search disabled until after play.");
     }
 
-    /**
-     * Prompts the user to choose a play mode.
-     * @return 1 for single-leader mode, 2 for sequential mode, 3 for randomized mode, 4 to quit.
-     */
     @Override
     public int promptPlayMode() {
         System.out.println("\nHow do you want to play?");
@@ -57,24 +46,18 @@ public class ConsoleUI implements GameUI {
         System.out.println("  2) Play ALL leaders in sequence");
         System.out.println("  3) Play ALL leaders with randomized levels and choices");
         System.out.println("  4) Quit");
-        System.out.print("Enter choice (1, 2, 3, or 4): ");
+        System.out.print("Enter choice (1–4): ");
         while (true) {
             try {
                 int mode = Integer.parseInt(sc.nextLine().trim());
                 if (mode >= 1 && mode <= 4) {
                     return mode;
                 }
-            } catch (NumberFormatException ignored) {
-            }
+            } catch (NumberFormatException ignored) {}
             System.out.print("Invalid. Please enter 1, 2, 3, or 4: ");
         }
     }
 
-    /**
-     * Allows the user to select a leader from a list.
-     * @param leaders The list of available leaders.
-     * @return The selected Leader object.
-     */
     @Override
     public Leader selectLeader(List<Leader> leaders) {
         List<Leader> sorted = leaders.stream()
@@ -97,27 +80,16 @@ public class ConsoleUI implements GameUI {
                     System.out.println("You chose \"" + selected.getName() + "\"\n");
                     return selected;
                 }
-            } catch (NumberFormatException ignored) {
-            }
+            } catch (NumberFormatException ignored) {}
             System.out.print("Invalid. Please enter a valid number: ");
         }
     }
 
-    /**
-     * Displays the current leader in sequential mode.
-     * @param leaderName The name of the leader.
-     * @param index The current leader index.
-     * @param total The total number of leaders.
-     */
     @Override
     public void displayLeaderSequence(String leaderName, int index, int total) {
         System.out.printf("%n=== Leader %d of %d: %s ===%n", index, total, leaderName);
     }
 
-    /**
-     * Displays a level's details.
-     * @param level The level to display.
-     */
     @Override
     public void displayLevel(Level level) {
         System.out.println("\n--- Level " + level.getNumber() + " (Leader: " + level.getLeaderName() + ") ---");
@@ -127,10 +99,6 @@ public class ConsoleUI implements GameUI {
         System.out.print("Your choice (1 or 2): ");
     }
 
-    /**
-     * Gets the player's choice for a level.
-     * @return 1 or 2 for valid choices, 0 for invalid input.
-     */
     @Override
     public int getPlayerChoice() {
         while (true) {
@@ -139,47 +107,27 @@ public class ConsoleUI implements GameUI {
                 if (choice == 1 || choice == 2) {
                     return choice;
                 }
-            } catch (NumberFormatException ignored) {
-            }
+            } catch (NumberFormatException ignored) {}
             System.out.print("Invalid. Please enter 1 or 2: ");
         }
     }
 
-    /**
-     * Displays a message when a level is skipped due to timeout or invalid input.
-     */
     @Override
     public void displayTimeoutSkip() {
         System.out.println("[No valid input — skipping level]");
     }
 
-    /**
-     * Displays the result of a player's choice.
-     * @param correct True if the choice was correct.
-     * @param summary The level's summary text.
-     */
     @Override
     public void displayResult(boolean correct, String summary) {
         System.out.println(correct ? "✔️ Correct!" : "❌ Incorrect");
         System.out.println(summary);
     }
 
-    /**
-     * Shows the player's current progress.
-     * @param score The current score.
-     * @param total The total number of levels.
-     */
     @Override
     public void showProgress(int score, int total) {
         System.out.printf("Progress: %d/%d%n", score, total);
     }
 
-    /**
-     * Displays the end-of-round summary.
-     * @param score The final score.
-     * @param total The total number of levels.
-     * @param timeMillis The time taken in milliseconds.
-     */
     @Override
     public void displayEndOfRound(int score, int total, long timeMillis) {
         System.out.println("\n=== Round Complete ===");
@@ -187,30 +135,18 @@ public class ConsoleUI implements GameUI {
         System.out.printf("Total Time: %.2f seconds%n", timeMillis / 1000.0);
     }
 
-    /**
-     * Prompts the user to search the archive.
-     * @return True if the user wants to search, false otherwise.
-     */
     @Override
     public boolean promptArchiveSearch() {
         System.out.print("Search your archive now? (yes/no): ");
         return sc.nextLine().trim().equalsIgnoreCase("yes");
     }
 
-    /**
-     * Prompts for a search keyword.
-     * @return The keyword entered by the user.
-     */
     @Override
     public String promptSearchKeyword() {
         System.out.print("Enter keyword to search: ");
         return sc.nextLine().trim();
     }
 
-    /**
-     * Prompts the user for a post-round option.
-     * @return 1 to play again, 2 to switch user, 3 to view stats, 4 to quit.
-     */
     @Override
     public int promptPostRoundOption() {
         System.out.println("\nWhat next?");
@@ -225,16 +161,11 @@ public class ConsoleUI implements GameUI {
                 if (choice >= 1 && choice <= 4) {
                     return choice;
                 }
-            } catch (NumberFormatException ignored) {
-            }
+            } catch (NumberFormatException ignored) {}
             System.out.print("Invalid. Please enter 1, 2, 3, or 4: ");
         }
     }
 
-    /**
-     * Displays the leaderboard.
-     * @param list The list of player records.
-     */
     @Override
     public void displayLeaderboard(List<PlayerRecord> list) {
         System.out.println("\n=== Single–Leader Best Scores ===");
@@ -277,18 +208,11 @@ public class ConsoleUI implements GameUI {
         }
     }
 
-    /**
-     * Displays a goodbye message.
-     */
     @Override
     public void displayGoodbyeMessage() {
         System.out.println("\nThanks for playing!");
     }
 
-    /**
-     * Displays a welcome message for the player, including last login and history option.
-     * @param player The player's record.
-     */
     public void displayWelcomeForPlayer(PlayerRecord player) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Long lastLogin = player.getLastLogin();
@@ -304,10 +228,6 @@ public class ConsoleUI implements GameUI {
         }
     }
 
-    /**
-     * Displays the player's login history.
-     * @param player The player's record.
-     */
     public void displayLoginHistory(PlayerRecord player) {
         System.out.println("\n=== Login History for " + player.getUsername() + " ===");
         List<Long> history = player.getLoginHistory();
@@ -321,15 +241,73 @@ public class ConsoleUI implements GameUI {
         }
     }
 
-    /**
-     * Displays the player's statistics.
-     * @param player The player's record.
-     */
     @Override
     public void displayPlayerStats(PlayerRecord player) {
         System.out.println("\n=== Player Statistics for " + player.getUsername() + " ===");
         System.out.printf("Total Levels Played: %d%n", player.getTotalLevelsPlayed());
         System.out.printf("Accuracy: %.2f%%%n", player.getAccuracy());
         System.out.printf("Average Time per Level: %.2f seconds%n", player.getAverageTimePerLevel());
+    }
+
+    public void offerCourseMaterial() {
+        System.out.print("\nWould you like to access the course material before starting? (yes/no): ");
+        if (sc.nextLine().trim().equalsIgnoreCase("yes")) {
+            accessCourseMaterial();
+        }
+    }
+
+    private void accessCourseMaterial() {
+        System.out.println("\nYou chose to access the course material:");
+        System.out.println("  1) Read it now");
+        System.out.println("  2) Download it");
+        System.out.println("  3) Skip");
+        System.out.print("Enter choice (1, 2, or 3): ");
+        while (true) {
+            try {
+                int choice = Integer.parseInt(sc.nextLine().trim());
+                switch (choice) {
+                    case 1 -> { readCourseMaterial(); return; }
+                    case 2 -> { downloadCourseMaterial(); return; }
+                    case 3 -> { System.out.println("Skipping course material."); return; }
+                    default -> System.out.print("Invalid. Please enter 1, 2, or 3: ");
+                }
+            } catch (NumberFormatException ignored) {
+                System.out.print("Invalid. Please enter 1, 2, or 3: ");
+            }
+        }
+    }
+
+    private void readCourseMaterial() {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("course.txt")) {
+            if (inputStream == null) {
+                System.out.println("Course material not found.");
+                return;
+            }
+            Scanner scanner = new Scanner(inputStream);
+            System.out.println("\n=== Course Material Start ===\n");
+            while (scanner.hasNextLine()) {
+                System.out.println(scanner.nextLine());
+            }
+            System.out.println("\n=== Course Material End ===\n");
+            scanner.close();
+        } catch (IOException e) {
+            System.out.println("Error reading course material: " + e.getMessage());
+        }
+    }
+
+
+    private void downloadCourseMaterial() {
+        System.out.print("Enter full path to save course.pdf (example: C:/Users/You/Desktop/course.txt): ");
+        String path = sc.nextLine().trim();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("course.txt")) {
+            if (inputStream == null) {
+                System.out.println("Course material not found.");
+                return;
+            }
+            Files.copy(inputStream, Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Course material saved successfully to: " + path);
+        } catch (IOException e) {
+            System.out.println("Error saving course material: " + e.getMessage());
+        }
     }
 }

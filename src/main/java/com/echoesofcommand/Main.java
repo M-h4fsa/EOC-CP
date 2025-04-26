@@ -21,7 +21,7 @@ public class Main {
         boolean running = true;
         while (running) {
             ui.displayWelcomeMessage();
-
+            ui.offerCourseMaterial();
             // Player login
             PlayerRecord player;
             String username = ui.promptUsername();
