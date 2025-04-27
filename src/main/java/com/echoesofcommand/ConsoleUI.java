@@ -23,7 +23,7 @@ public class ConsoleUI implements GameUI {
     public String promptUsername() {
         while (true) {
             System.out.print("Enter your username: ");
-            String username = sc.nextLine().trim();
+            String username = sc.nextLine().trim().toLowerCase();
             if (username.isEmpty()) {
                 System.out.println("Error: Username cannot be empty.");
             } else if (!username.matches(VALID_USERNAME_REGEX)) {
