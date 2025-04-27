@@ -103,7 +103,7 @@ public class Game {
 
         long elapsed = System.currentTimeMillis() - startTime;
         ui.displayEndOfRound(score, totalLevels, elapsed);
-        player.recordSession(score, elapsed, sequential);
+        player.recordSession(score, elapsed, sequential, randomized);
         player.updateStatistics(levelsPlayed, correctChoices, elapsed);
     }
 
